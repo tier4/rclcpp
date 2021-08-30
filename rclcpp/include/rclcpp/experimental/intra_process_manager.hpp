@@ -39,6 +39,8 @@
 #include "rclcpp/publisher_base.hpp"
 #include "rclcpp/visibility_control.hpp"
 
+#include "tracetools/tracetools.h"
+
 namespace rclcpp
 {
 
@@ -227,6 +229,7 @@ public:
       // Construct a new shared pointer from the message
       // for the buffers that do not require ownership
       auto shared_msg = std::allocate_shared<MessageT, MessageAllocatorT>(*allocator, *message);
+      TRACEPOINT(message_construct, message.get(), shared_msg.get());
 
       this->template add_shared_msg_to_buffers<MessageT, Alloc, Deleter>(
         shared_msg, sub_ids.take_shared_subscriptions);
@@ -272,6 +275,7 @@ public:
       // Construct a new shared pointer from the message for the buffers that
       // do not require ownership and to return.
       auto shared_msg = std::allocate_shared<MessageT, MessageAllocatorT>(*allocator, *message);
+      TRACEPOINT(message_construct, message.get(), shared_msg.get());
 
       if (!sub_ids.take_shared_subscriptions.empty()) {
         this->template add_shared_msg_to_buffers<MessageT, Alloc, Deleter>(
@@ -425,6 +429,8 @@ private:
           Deleter deleter = message.get_deleter();
           auto ptr = MessageAllocTraits::allocate(*allocator.get(), 1);
           MessageAllocTraits::construct(*allocator.get(), ptr, *message);
+	  TRACEPOINT(message_construct, message.get(), ptr);
+
           copy_message = MessageUniquePtr(ptr, deleter);
 
           subscription->provide_intra_process_message(std::move(copy_message));

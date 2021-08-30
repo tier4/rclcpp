@@ -339,6 +339,7 @@ protected:
   do_intra_process_publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
     auto ipm = weak_ipm_.lock();
+    TRACEPOINT(rclcpp_intra_publish, static_cast<const void *>(publisher_handle_.get()), msg.get());
     if (!ipm) {
       throw std::runtime_error(
               "intra process publish called after destruction of intra process manager");
@@ -357,6 +358,7 @@ protected:
   do_intra_process_publish_and_return_shared(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
     auto ipm = weak_ipm_.lock();
+    TRACEPOINT(rclcpp_intra_publish, static_cast<const void *>(publisher_handle_.get()), msg.get());
     if (!ipm) {
       throw std::runtime_error(
               "intra process publish called after destruction of intra process manager");

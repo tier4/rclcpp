@@ -226,7 +226,11 @@ public:
     std::shared_ptr<MessageT> message,
     const rclcpp::MessageInfo & message_info)
   {
-    TRACEPOINT(callback_start, static_cast<const void *>(this), false);
+    auto callback_ptr = static_cast<const void *>(this);
+    auto rmw_info = message_info.get_rmw_message_info();
+    auto source_timestamp = rmw_info.source_timestamp;
+    TRACEPOINT(dispatch_subscription_callback, message.get() , callback_ptr, source_timestamp);
+    TRACEPOINT(callback_start, callback_ptr, false);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
       if (std::get<0>(callback_variant_) == nullptr) {
@@ -271,7 +275,9 @@ public:
     std::shared_ptr<const MessageT> message,
     const rclcpp::MessageInfo & message_info)
   {
-    TRACEPOINT(callback_start, static_cast<const void *>(this), true);
+    auto callback_ptr = static_cast<const void *>(this);
+    TRACEPOINT(dispatch_intra_process_subscription_callback, message.get() , callback_ptr);
+    TRACEPOINT(callback_start, callback_ptr, true);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
       if (std::get<0>(callback_variant_) == nullptr) {
@@ -320,7 +326,9 @@ public:
     std::unique_ptr<MessageT, MessageDeleter> message,
     const rclcpp::MessageInfo & message_info)
   {
-    TRACEPOINT(callback_start, static_cast<const void *>(this), true);
+    auto callback_ptr = static_cast<const void *>(this);
+    TRACEPOINT(dispatch_intra_process_subscription_callback, message.get() , callback_ptr);
+    TRACEPOINT(callback_start, callback_ptr, true);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
       if (std::get<0>(callback_variant_) == nullptr) {

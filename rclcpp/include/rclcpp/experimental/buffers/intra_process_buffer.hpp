@@ -24,6 +24,8 @@
 #include "rclcpp/experimental/buffers/buffer_implementation_base.hpp"
 #include "rclcpp/macros.hpp"
 
+#include "tracetools/tracetools.h"
+
 namespace rclcpp
 {
 namespace experimental
@@ -166,6 +168,7 @@ private:
     MessageDeleter * deleter = std::get_deleter<MessageDeleter, const MessageT>(shared_msg);
     auto ptr = MessageAllocTraits::allocate(*message_allocator_.get(), 1);
     MessageAllocTraits::construct(*message_allocator_.get(), ptr, *shared_msg);
+    TRACEPOINT(message_construct, shared_msg.get(), ptr);
     if (deleter) {
       unique_msg = MessageUniquePtr(ptr, *deleter);
     } else {
@@ -212,6 +215,7 @@ private:
     MessageDeleter * deleter = std::get_deleter<MessageDeleter, const MessageT>(buffer_msg);
     auto ptr = MessageAllocTraits::allocate(*message_allocator_.get(), 1);
     MessageAllocTraits::construct(*message_allocator_.get(), ptr, *buffer_msg);
+    TRACEPOINT(message_construct, buffer_msg.get(), ptr);
     if (deleter) {
       unique_msg = MessageUniquePtr(ptr, *deleter);
     } else {
