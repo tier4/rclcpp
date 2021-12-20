@@ -39,7 +39,9 @@
 #include "rclcpp/publisher_options.hpp"
 #include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
+#include "rclcpp/timestamp.hpp"
 
+#include "libstatistics_collector/topic_statistics_collector/received_message_age.hpp"
 #include "tracetools/tracetools.h"
 
 namespace rclcpp
@@ -58,6 +60,7 @@ public:
   using MessageDeleter = allocator::Deleter<MessageAllocator, MessageT>;
   using MessageUniquePtr = std::unique_ptr<MessageT, MessageDeleter>;
   using MessageSharedPtr = std::shared_ptr<const MessageT>;
+  using TimeStamp = rclcpp::TimeStamp<MessageT>;
 
   RCLCPP_SMART_PTR_DEFINITIONS(Publisher<MessageT, AllocatorT>)
 
@@ -284,7 +287,8 @@ protected:
     TRACEPOINT(
       rclcpp_publish,
       static_cast<const void *>(publisher_handle_.get()),
-      static_cast<const void *>(&msg));
+      static_cast<const void *>(&msg),
+      static_cast<const uint64_t>(TimeStamp::value(msg).second));
     auto status = rcl_publish(publisher_handle_.get(), &msg, nullptr);
 
     if (RCL_RET_PUBLISHER_INVALID == status) {
@@ -339,7 +343,11 @@ protected:
   do_intra_process_publish(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
     auto ipm = weak_ipm_.lock();
-    TRACEPOINT(rclcpp_intra_publish, static_cast<const void *>(publisher_handle_.get()), msg.get());
+    TRACEPOINT(
+      rclcpp_intra_publish,
+      static_cast<const void *>(publisher_handle_.get()),
+      msg.get(),
+      static_cast<const uint64_t>(TimeStamp::value(*msg).second));
     if (!ipm) {
       throw std::runtime_error(
               "intra process publish called after destruction of intra process manager");
@@ -358,7 +366,11 @@ protected:
   do_intra_process_publish_and_return_shared(std::unique_ptr<MessageT, MessageDeleter> msg)
   {
     auto ipm = weak_ipm_.lock();
-    TRACEPOINT(rclcpp_intra_publish, static_cast<const void *>(publisher_handle_.get()), msg.get());
+    TRACEPOINT(
+      rclcpp_intra_publish,
+      static_cast<const void *>(publisher_handle_.get()),
+      msg.get(),
+      static_cast<const uint64_t>(TimeStamp::value(*msg).second));
     if (!ipm) {
       throw std::runtime_error(
               "intra process publish called after destruction of intra process manager");

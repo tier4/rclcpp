@@ -24,11 +24,13 @@
 
 #include "tracetools/tracetools.h"
 #include "tracetools/utils.hpp"
+#include "libstatistics_collector/topic_statistics_collector/received_message_age.hpp"
 
 #include "rclcpp/allocator/allocator_common.hpp"
 #include "rclcpp/detail/subscription_callback_type_helper.hpp"
 #include "rclcpp/function_traits.hpp"
 #include "rclcpp/message_info.hpp"
+#include "rclcpp/timestamp.hpp"
 
 template<class>
 inline constexpr bool always_false_v = false;
@@ -125,6 +127,8 @@ private:
 
   using SharedPtrCallback = typename HelperT::SharedPtrCallback;
   using SharedPtrWithInfoCallback = typename HelperT::SharedPtrWithInfoCallback;
+
+  using TimeStamp = rclcpp::TimeStamp<MessageT>;
 
 public:
   explicit
@@ -229,7 +233,12 @@ public:
     auto callback_ptr = static_cast<const void *>(this);
     auto rmw_info = message_info.get_rmw_message_info();
     auto source_timestamp = rmw_info.source_timestamp;
-    TRACEPOINT(dispatch_subscription_callback, message.get() , callback_ptr, source_timestamp);
+    TRACEPOINT(
+      dispatch_subscription_callback,
+      message.get(),
+      callback_ptr,
+      source_timestamp,
+      static_cast<const uint64_t>(TimeStamp::value(*message).second));
     TRACEPOINT(callback_start, callback_ptr, false);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
@@ -276,7 +285,11 @@ public:
     const rclcpp::MessageInfo & message_info)
   {
     auto callback_ptr = static_cast<const void *>(this);
-    TRACEPOINT(dispatch_intra_process_subscription_callback, message.get() , callback_ptr);
+    TRACEPOINT(
+      dispatch_intra_process_subscription_callback,
+      message.get(),
+      callback_ptr,
+      static_cast<const uint64_t>(TimeStamp::value(*message).second));
     TRACEPOINT(callback_start, callback_ptr, true);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
@@ -327,7 +340,11 @@ public:
     const rclcpp::MessageInfo & message_info)
   {
     auto callback_ptr = static_cast<const void *>(this);
-    TRACEPOINT(dispatch_intra_process_subscription_callback, message.get() , callback_ptr);
+    TRACEPOINT(
+      dispatch_intra_process_subscription_callback,
+      message.get(),
+      callback_ptr,
+      static_cast<const uint64_t>(TimeStamp::value(*message).second));
     TRACEPOINT(callback_start, callback_ptr, true);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
