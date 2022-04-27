@@ -24,6 +24,8 @@
 #include <utility>
 #include <vector>
 
+#include "tracetools/tracetools.h"
+
 #include "rclcpp/experimental/buffers/buffer_implementation_base.hpp"
 #include "rclcpp/logger.hpp"
 #include "rclcpp/logging.hpp"
@@ -55,6 +57,7 @@ public:
     if (capacity == 0) {
       throw std::invalid_argument("capacity must be a positive, non-zero value");
     }
+    TRACEPOINT(construct_ring_buffer, static_cast<const void*>(this), capacity);
   }
 
   virtual ~RingBufferImplementation() {}
@@ -70,6 +73,7 @@ public:
     std::lock_guard<std::mutex> lock(mutex_);
 
     write_index_ = next_(write_index_);
+    auto request_addr = request.get();
     ring_buffer_[write_index_] = std::move(request);
 
     if (is_full_()) {
@@ -77,6 +81,7 @@ public:
     } else {
       size_++;
     }
+    TRACEPOINT(ring_buffer_enqueue, static_cast<const void*>(this), request_addr, is_full_());
   }
 
   /// Remove the oldest element from ring buffer
@@ -98,6 +103,7 @@ public:
     read_index_ = next_(read_index_);
 
     size_--;
+    TRACEPOINT(ring_buffer_dequeue, static_cast<const void*>(this), request.get());
 
     return request;
   }
@@ -140,7 +146,9 @@ public:
     return is_full_();
   }
 
-  void clear() {}
+  void clear() {
+    TRACEPOINT(ring_buffer_clear, static_cast<const void*>(this));
+  }
 
 private:
   /// Get the next index value for the ring buffer
