@@ -44,6 +44,8 @@
 #include "libstatistics_collector/topic_statistics_collector/received_message_age.hpp"
 #include "tracetools/tracetools.h"
 
+#define CARET_RCLCPP_VERSION "0.3"
+
 namespace rclcpp
 {
 
@@ -116,6 +118,10 @@ public:
         // pass
       }
     }
+
+    TRACEPOINT(
+      rclcpp_publisher_init,
+      static_cast<const void *>(publisher_handle_.get()), CARET_RCLCPP_VERSION);
     // Setup continues in the post construction method, post_init_setup().
   }
 
