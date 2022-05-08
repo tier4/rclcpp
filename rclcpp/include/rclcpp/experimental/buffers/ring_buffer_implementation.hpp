@@ -81,7 +81,7 @@ public:
     } else {
       size_++;
     }
-    TRACEPOINT(ring_buffer_enqueue, static_cast<const void*>(this), request_addr, is_full_());
+    TRACEPOINT(ring_buffer_enqueue, static_cast<const void*>(this), request_addr, size_, is_full_());
   }
 
   /// Remove the oldest element from ring buffer
@@ -103,7 +103,7 @@ public:
     read_index_ = next_(read_index_);
 
     size_--;
-    TRACEPOINT(ring_buffer_dequeue, static_cast<const void*>(this), request.get());
+    TRACEPOINT(ring_buffer_dequeue, static_cast<const void*>(this), request.get(), size_);
 
     return request;
   }
