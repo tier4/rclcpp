@@ -73,7 +73,7 @@ public:
     std::lock_guard<std::mutex> lock(mutex_);
 
     write_index_ = next_(write_index_);
-    auto request_addr = request.get();
+    auto request_addr = &(*request);
     ring_buffer_[write_index_] = std::move(request);
 
     if (is_full_()) {
@@ -103,7 +103,7 @@ public:
     read_index_ = next_(read_index_);
 
     size_--;
-    TRACEPOINT(ring_buffer_dequeue, static_cast<const void*>(this), request.get(), size_);
+    TRACEPOINT(ring_buffer_dequeue, static_cast<const void*>(this), &(*request), size_);
 
     return request;
   }
