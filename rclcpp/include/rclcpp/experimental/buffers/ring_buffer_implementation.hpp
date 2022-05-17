@@ -73,7 +73,6 @@ public:
     std::lock_guard<std::mutex> lock(mutex_);
 
     write_index_ = next_(write_index_);
-    auto request_addr = &(*request);
     ring_buffer_[write_index_] = std::move(request);
 
     if (is_full_()) {
@@ -81,7 +80,7 @@ public:
     } else {
       size_++;
     }
-    TRACEPOINT(ring_buffer_enqueue, static_cast<const void*>(this), request_addr, size_, is_full_());
+    TRACEPOINT(ring_buffer_enqueue, static_cast<const void*>(this), write_index_, size_, is_full_());
   }
 
   /// Remove the oldest element from ring buffer
@@ -99,11 +98,12 @@ public:
       throw std::runtime_error("Calling dequeue on empty intra-process buffer");
     }
 
+    auto read_index = read_index_;
     auto request = std::move(ring_buffer_[read_index_]);
     read_index_ = next_(read_index_);
 
     size_--;
-    TRACEPOINT(ring_buffer_dequeue, static_cast<const void*>(this), &(*request), size_);
+    TRACEPOINT(ring_buffer_dequeue, static_cast<const void*>(this), read_index, size_);
 
     return request;
   }
