@@ -25,6 +25,7 @@
 #include "rosidl_runtime_cpp/traits.hpp"
 #include "tracetools/tracetools.h"
 #include "tracetools/utils.hpp"
+#include "libstatistics_collector/topic_statistics_collector/received_message_age.hpp"
 
 #include "rclcpp/allocator/allocator_common.hpp"
 #include "rclcpp/detail/subscription_callback_type_helper.hpp"
@@ -32,6 +33,7 @@
 #include "rclcpp/message_info.hpp"
 #include "rclcpp/serialized_message.hpp"
 #include "rclcpp/type_adapter.hpp"
+#include "rclcpp/timestamp.hpp"
 
 
 template<class>
@@ -343,6 +345,8 @@ private:
 
     const T * pointer;
   };
+  using TimeStampRosMessage = rclcpp::TimeStamp<ROSMessageType>;
+  using TimeStampSubMessage = rclcpp::TimeStamp<SubscribedType>;
 
 public:
   explicit
@@ -492,7 +496,16 @@ public:
     std::shared_ptr<ROSMessageType> message,
     const rclcpp::MessageInfo & message_info)
   {
-    TRACEPOINT(callback_start, static_cast<const void *>(this), false);
+    auto callback_ptr = static_cast<const void *>(this);
+    auto rmw_info = message_info.get_rmw_message_info();
+    auto source_timestamp = rmw_info.source_timestamp;
+    TRACEPOINT(
+      dispatch_subscription_callback,
+      message.get(),
+      callback_ptr,
+      source_timestamp,
+      static_cast<const uint64_t>(TimeStampRosMessage::value(*message).second));
+    TRACEPOINT(callback_start, callback_ptr, false);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
       if (std::get<0>(callback_variant_) == nullptr) {
@@ -592,6 +605,7 @@ public:
     std::shared_ptr<rclcpp::SerializedMessage> serialized_message,
     const rclcpp::MessageInfo & message_info)
   {
+    // cannot convert to a TypedMessage, caret insert dispatch tracepoint.
     TRACEPOINT(callback_start, static_cast<const void *>(this), false);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
@@ -671,7 +685,13 @@ public:
     std::shared_ptr<const SubscribedType> message,
     const rclcpp::MessageInfo & message_info)
   {
-    TRACEPOINT(callback_start, static_cast<const void *>(this), true);
+    auto callback_ptr = static_cast<const void *>(this);
+    TRACEPOINT(
+      dispatch_intra_process_subscription_callback,
+      message.get(),
+      callback_ptr,
+      static_cast<const uint64_t>(TimeStampSubMessage::value(*message).second));
+    TRACEPOINT(callback_start, callback_ptr, true);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
       if (std::get<0>(callback_variant_) == nullptr) {
@@ -801,7 +821,13 @@ public:
     std::unique_ptr<SubscribedType, SubscribedTypeDeleter> message,
     const rclcpp::MessageInfo & message_info)
   {
-    TRACEPOINT(callback_start, static_cast<const void *>(this), true);
+    auto callback_ptr = static_cast<const void *>(this);
+    TRACEPOINT(
+      dispatch_intra_process_subscription_callback,
+      message.get(),
+      callback_ptr,
+      static_cast<const uint64_t>(TimeStampSubMessage::value(*message).second));
+    TRACEPOINT(callback_start, callback_ptr, true);
     // Check if the variant is "unset", throw if it is.
     if (callback_variant_.index() == 0) {
       if (std::get<0>(callback_variant_) == nullptr) {
