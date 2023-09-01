@@ -481,6 +481,14 @@ public:
   {
     rcl_ret_t ret = rcl_send_response(get_service_handle().get(), &req_id, &response);
 
+    if (ret == RCL_RET_TIMEOUT) {
+      RCLCPP_WARN(
+        node_logger_.get_child("rclcpp"),
+        "failed to send response to %s (timeout): %s",
+        this->get_service_name(), rcl_get_error_string().str);
+      rcl_reset_error();
+      return;
+    }
     if (ret != RCL_RET_OK) {
       constexpr size_t retry_num = 100;
       rcl_ret_t ret_2 = RCL_RET_NOT_INIT;
