@@ -93,12 +93,15 @@ macro(rclcpp_components_register_node target)
     endif()
   endif()
 
+  find_package(glog QUIET REQUIRED)
+
   configure_file(${rclcpp_components_NODE_TEMPLATE}
     ${PROJECT_BINARY_DIR}/rclcpp_components/node_main_configured_${node}.cpp.in)
   file(GENERATE OUTPUT ${PROJECT_BINARY_DIR}/rclcpp_components/node_main_${node}.cpp
     INPUT ${PROJECT_BINARY_DIR}/rclcpp_components/node_main_configured_${node}.cpp.in)
   add_executable(${node} ${PROJECT_BINARY_DIR}/rclcpp_components/node_main_${node}.cpp)
   target_link_libraries(${node}
+    glog::glog
     class_loader::class_loader
     rclcpp::rclcpp
     rclcpp_components::component
