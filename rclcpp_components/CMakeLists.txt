@@ -17,6 +17,7 @@ find_package(ament_cmake_ros REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(class_loader REQUIRED)
 find_package(composition_interfaces REQUIRED)
+find_package(glog REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rcpputils REQUIRED)
 
@@ -51,7 +52,7 @@ add_executable(
   component_container
   src/component_container.cpp
 )
-target_link_libraries(component_container component_manager)
+target_link_libraries(component_container component_manager glog::glog)
 ament_target_dependencies(component_container
   "rclcpp"
 )
@@ -65,7 +66,7 @@ add_executable(
   component_container_mt
   src/component_container_mt.cpp
 )
-target_link_libraries(component_container_mt component_manager)
+target_link_libraries(component_container_mt component_manager glog::glog)
 ament_target_dependencies(component_container_mt
   "rclcpp"
 )
@@ -74,7 +75,7 @@ add_executable(
   component_container_isolated
   src/component_container_isolated.cpp
 )
-target_link_libraries(component_container_isolated component_manager)
+target_link_libraries(component_container_isolated component_manager glog::glog)
 ament_target_dependencies(component_container_isolated
   "rclcpp"
 )
