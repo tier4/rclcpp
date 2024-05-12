@@ -65,11 +65,14 @@ macro(rclcpp_components_register_node target)
     "${_RCLCPP_COMPONENTS_${resource_index}__NODES}${component};${_path}/$<TARGET_FILE_NAME:${target}>\n")
   list(APPEND _RCLCPP_COMPONENTS_PACKAGE_RESOURCE_INDICES ${resource_index})
 
+  find_package(glog QUIET REQUIRED)
+
   configure_file(${rclcpp_components_NODE_TEMPLATE}
     ${PROJECT_BINARY_DIR}/rclcpp_components/node_main_configured_${node}.cpp.in)
   file(GENERATE OUTPUT ${PROJECT_BINARY_DIR}/rclcpp_components/node_main_${node}.cpp
     INPUT ${PROJECT_BINARY_DIR}/rclcpp_components/node_main_configured_${node}.cpp.in)
   add_executable(${node} ${PROJECT_BINARY_DIR}/rclcpp_components/node_main_${node}.cpp)
+  target_link_libraries(${node} glog::glog)
   ament_target_dependencies(${node}
     "rclcpp"
     "class_loader"

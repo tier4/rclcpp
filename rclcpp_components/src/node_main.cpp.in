@@ -1,4 +1,5 @@
 // Copyright 2019 Open Source Robotics Foundation, Inc.
+// Copyright 2024 TIER IV, Inc. (Edit for glog)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +16,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <glog/logging.h>
 
 #include "class_loader/class_loader.hpp"
 #include "rclcpp/rclcpp.hpp"
@@ -25,6 +27,9 @@
 
 int main(int argc, char * argv[])
 {
+  google::InitGoogleLogging(argv[0]);
+  google::InstallFailureSignalHandler();
+
   auto args = rclcpp::init_and_remove_ros_arguments(argc, argv);
   rclcpp::Logger logger = rclcpp::get_logger(NODE_MAIN_LOGGER_NAME);
   rclcpp::executors::@executor@ exec;
