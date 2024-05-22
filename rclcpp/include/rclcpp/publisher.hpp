@@ -43,7 +43,9 @@
 #include "rclcpp/type_adapter.hpp"
 #include "rclcpp/type_support_decl.hpp"
 #include "rclcpp/visibility_control.hpp"
+#include "rclcpp/timestamp.hpp"
 
+#include "libstatistics_collector/topic_statistics_collector/received_message_age.hpp"
 #include "tracetools/tracetools.h"
 
 namespace rclcpp
@@ -108,6 +110,9 @@ public:
   using MessageSharedPtr
   [[deprecated("use std::shared_ptr<const PublishedType>")]] =
     std::shared_ptr<const PublishedType>;
+
+  using TimeStampRosMessage = rclcpp::TimeStamp<ROSMessageType>;
+  using TimeStampPubMessage = rclcpp::TimeStamp<PublishedType>;
 
   RCLCPP_SMART_PTR_DEFINITIONS(Publisher<MessageT, AllocatorT>)
 
@@ -449,7 +454,10 @@ protected:
   void
   do_inter_process_publish(const ROSMessageType & msg)
   {
-    TRACEPOINT(rclcpp_publish, nullptr, static_cast<const void *>(&msg));
+    TRACEPOINT(
+      rclcpp_publish,
+      static_cast<const void *>(publisher_handle_.get()),
+      static_cast<const void *>(&msg));
     auto status = rcl_publish(publisher_handle_.get(), &msg, nullptr);
 
     if (RCL_RET_PUBLISHER_INVALID == status) {
@@ -512,6 +520,10 @@ protected:
     if (!msg) {
       throw std::runtime_error("cannot publish msg which is a null pointer");
     }
+    TRACEPOINT(
+      rclcpp_intra_publish,
+      static_cast<const void *>(publisher_handle_.get()),
+      msg.get());
 
     ipm->template do_intra_process_publish<PublishedType, ROSMessageType, AllocatorT>(
       intra_process_publisher_id_,
@@ -531,6 +543,11 @@ protected:
       throw std::runtime_error("cannot publish msg which is a null pointer");
     }
 
+    TRACEPOINT(
+      rclcpp_intra_publish,
+      static_cast<const void *>(publisher_handle_.get()),
+      msg.get());
+
     ipm->template do_intra_process_publish<ROSMessageType, ROSMessageType, AllocatorT>(
       intra_process_publisher_id_,
       std::move(msg),
@@ -549,6 +566,10 @@ protected:
     if (!msg) {
       throw std::runtime_error("cannot publish msg which is a null pointer");
     }
+    TRACEPOINT(
+      rclcpp_intra_publish,
+      static_cast<const void *>(publisher_handle_.get()),
+      msg.get());
 
     return ipm->template do_intra_process_publish_and_return_shared<ROSMessageType, ROSMessageType,
              AllocatorT>(
