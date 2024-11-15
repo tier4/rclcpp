@@ -220,6 +220,10 @@ ComponentManager::on_load_node(
 {
   (void) request_header;
 
+  // Workaround for LiDAR deactivate ISSUE
+  // Reduce the load on launch, otherwise some nodes may not be loaded
+  rclcpp::sleep_for(std::chrono::milliseconds(10 * 1000));
+
   try {
     auto resources = get_component_resources(request->package_name);
 
