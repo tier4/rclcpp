@@ -3,6 +3,9 @@ Changelog for package rclcpp_lifecycle
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+Forthcoming
+-----------
+
 16.0.13 (2025-06-23)
 --------------------
 * Added missing chrono includes (backport `#2854 <https://github.com/ros2/rclcpp/issues/2854>`_) (`#2857 <https://github.com/ros2/rclcpp/issues/2857>`_)
