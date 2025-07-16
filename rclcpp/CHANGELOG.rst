@@ -2,8 +2,8 @@
 Changelog for package rclcpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+16.0.14 (2025-07-16)
+--------------------
 * fix test_publisher_with_system_default_qos. (backport `#2881 <https://github.com/ros2/rclcpp/issues/2881>`_) (`#2882 <https://github.com/ros2/rclcpp/issues/2882>`_)
 * Contributors: mergify[bot]
 
