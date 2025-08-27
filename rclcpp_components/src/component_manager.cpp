@@ -221,6 +221,35 @@ ComponentManager::on_load_node(
   (void) request_header;
 
   try {
+    // check if node already exists in the container
+    if (!request->node_name.empty()) {
+      const std::string & ns = request->node_namespace;
+      std::string requested_fqn;
+      if (ns.empty() || ns == "/") {
+        requested_fqn = "/" + request->node_name;
+      } else if (ns.back() == '/') {
+        requested_fqn = ns + request->node_name;
+      } else {
+        requested_fqn = ns + "/" + request->node_name;
+      }
+
+      // scan existing nodes
+      for (auto & kv : node_wrappers_) {
+        const auto base = kv.second.get_node_base_interface();
+        if (base && base->get_fully_qualified_name() == requested_fqn) {
+          // already exists -> return existing instance
+          response->full_node_name = requested_fqn;
+          response->unique_id = kv.first;
+          response->success = true;
+          RCLCPP_WARN(
+            get_logger(),
+            "[LoadNode] Deduplicated : node '%s' already exists. Skipping load.",
+            requested_fqn.c_str());
+          return;
+        }
+      }
+    }
+
     auto resources = get_component_resources(request->package_name);
 
     for (const auto & resource : resources) {
