@@ -165,18 +165,6 @@ protected:
   virtual void
   remove_node_from_executor(uint64_t node_id);
 
-  /// Check if a node with the same name already exists in the container
-  /**
-   * \param request information with the node to load
-   * \param response response to be filled if node already exists
-   * \return true if node already exists, false otherwise
-   */
-  RCLCPP_COMPONENTS_PUBLIC
-  virtual bool
-  check_node_duplication(
-    const std::shared_ptr<LoadNode::Request> request,
-    std::shared_ptr<LoadNode::Response> response);
-
   /// Service callback to load a new node in the component
   /**
    * This function allows to add parameters, remap rules, a specific node, name a namespace
