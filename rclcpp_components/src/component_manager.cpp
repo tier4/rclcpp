@@ -214,6 +214,44 @@ ComponentManager::remove_node_from_executor(uint64_t node_id)
   }
 }
 
+bool
+ComponentManager::check_node_duplication(
+  const std::shared_ptr<LoadNode::Request> request,
+  std::shared_ptr<LoadNode::Response> response)
+{
+  if (request->node_name.empty()) {
+    return false;
+  }
+
+  const std::string & ns = request->node_namespace;
+  std::string requested_fqn;
+  if (ns.empty() || ns == "/") {
+    requested_fqn = "/" + request->node_name;
+  } else if (ns.back() == '/') {
+    requested_fqn = ns + request->node_name;
+  } else {
+    requested_fqn = ns + "/" + request->node_name;
+  }
+
+  // scan existing nodes
+  for (auto & kv : node_wrappers_) {
+    const auto base = kv.second.get_node_base_interface();
+    if (base && base->get_fully_qualified_name() == requested_fqn) {
+      // already exists -> return existing instance
+      response->full_node_name = requested_fqn;
+      response->unique_id = kv.first;
+      response->success = true;
+      RCLCPP_WARN(
+        get_logger(),
+        "[LoadNode] Deduplicated : node '%s' already exists. Skipping load.",
+        requested_fqn.c_str());
+      return true;
+    }
+  }
+
+  return false;
+}
+
 void
 ComponentManager::on_load_node(
   const std::shared_ptr<rmw_request_id_t> request_header,
@@ -224,32 +262,8 @@ ComponentManager::on_load_node(
 
   try {
     // check if node already exists in the container
-    if (!request->node_name.empty()) {
-      const std::string & ns = request->node_namespace;
-      std::string requested_fqn;
-      if (ns.empty() || ns == "/") {
-        requested_fqn = "/" + request->node_name;
-      } else if (ns.back() == '/') {
-        requested_fqn = ns + request->node_name;
-      } else {
-        requested_fqn = ns + "/" + request->node_name;
-      }
-
-      // scan existing nodes
-      for (auto & kv : node_wrappers_) {
-        const auto base = kv.second.get_node_base_interface();
-        if (base && base->get_fully_qualified_name() == requested_fqn) {
-          // already exists -> return existing instance
-          response->full_node_name = requested_fqn;
-          response->unique_id = kv.first;
-          response->success = true;
-          RCLCPP_WARN(
-            get_logger(),
-            "[LoadNode] Deduplicated : node '%s' already exists. Skipping load.",
-            requested_fqn.c_str());
-          return;
-        }
-      }
+    if (check_node_duplication(request, response)) {
+      return;
     }
 
     auto resources = get_component_resources(request->package_name);
