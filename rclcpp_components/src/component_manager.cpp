@@ -232,19 +232,24 @@ ComponentManager::check_node_duplication(
   }
 
   // scan existing nodes
-  for (auto & kv : node_wrappers_) {
-    const auto base = kv.second.get_node_base_interface();
-    if (base && base->get_fully_qualified_name() == requested_fqn) {
-      // already exists -> return existing instance
-      response->full_node_name = requested_fqn;
-      response->unique_id = kv.first;
-      response->success = true;
-      RCLCPP_WARN(
-        get_logger(),
-        "[LoadNode] Deduplicated : node '%s' already exists. Skipping load.",
-        requested_fqn.c_str());
-      return true;
-    }
+  auto existing_node = std::find_if(
+    node_wrappers_.begin(),
+    node_wrappers_.end(),
+    [&requested_fqn](auto & kv) {
+      const auto base = kv.second.get_node_base_interface();
+      return base && base->get_fully_qualified_name() == requested_fqn;
+    });
+
+  if (existing_node != node_wrappers_.end()) {
+    // already exists -> return existing instance
+    response->full_node_name = requested_fqn;
+    response->unique_id = existing_node->first;
+    response->success = true;
+    RCLCPP_WARN(
+      get_logger(),
+      "[LoadNode] Deduplicated : node '%s' already exists. Skipping load.",
+      requested_fqn.c_str());
+    return true;
   }
 
   return false;
