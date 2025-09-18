@@ -485,7 +485,7 @@ public:
       constexpr size_t retry_num = 100;
       rcl_ret_t ret_2 = RCL_RET_NOT_INIT;
       for (size_t i = 1; i < retry_num; ++i) {
-        rclcpp::sleep_for(std::chrono::milliseconds(100));
+        rclcpp::sleep_for(std::chrono::milliseconds(1000));
         ret_2 = rcl_send_response(get_service_handle().get(), &req_id, &response);
         if (ret_2 == RCL_RET_OK) {
           break;
