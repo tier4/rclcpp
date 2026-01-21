@@ -2,8 +2,8 @@
 Changelog for package rclcpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+28.1.16 (2026-01-21)
+--------------------
 * Improve the robustness of the TopicEndpointInfo constructor (`#3013 <https://github.com/ros2/rclcpp/issues/3013>`_) (`#3015 <https://github.com/ros2/rclcpp/issues/3015>`_)
   (cherry picked from commit 7f783cbf587a2897572263b48b9583d8021f3958)
   Co-authored-by: Barry Xu <barry.xu@sony.com>
