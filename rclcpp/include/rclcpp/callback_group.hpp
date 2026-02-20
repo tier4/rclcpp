@@ -95,6 +95,10 @@ public:
     CallbackGroupType group_type,
     bool automatically_add_to_executor_with_node = true);
 
+  /// Default destructor.
+  RCLCPP_PUBLIC
+  ~CallbackGroup();
+
   template<typename Function>
   rclcpp::SubscriptionBase::SharedPtr
   find_subscription_ptrs_if(Function func) const
