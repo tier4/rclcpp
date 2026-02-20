@@ -27,6 +27,8 @@ CallbackGroup::CallbackGroup(
   automatically_add_to_executor_with_node_(automatically_add_to_executor_with_node)
 {}
 
+CallbackGroup::~CallbackGroup()
+{}
 
 std::atomic_bool &
 CallbackGroup::can_be_taken_from()
