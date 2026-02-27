@@ -29,6 +29,62 @@ using namespace std::placeholders;
 
 namespace rclcpp_components
 {
+namespace
+{
+  /// Check if a node with the same name already exists in the container
+  /**
+   * \param request information with the node to load
+   * \param node_wrappers map of nodes in the container
+   * \param logger logger
+   * \param response response to be filled if node already exists
+   * \return true if node already exists, false otherwise
+   */
+bool check_node_duplication(
+  const std::shared_ptr<composition_interfaces::srv::LoadNode::Request> request,
+  const std::map<uint64_t, rclcpp_components::NodeInstanceWrapper> & node_wrappers,
+  const rclcpp::Logger & logger,
+  std::shared_ptr<composition_interfaces::srv::LoadNode::Response> response)
+{
+  if (request->node_name.empty()) {
+    return false;
+  }
+
+  const std::string & ns = request->node_namespace;
+  std::string requested_fqn;
+  if (ns.empty() || ns == "/") {
+    requested_fqn = "/" + request->node_name;
+  } else if (ns.back() == '/') {
+    requested_fqn = ns + request->node_name;
+  } else {
+    requested_fqn = ns + "/" + request->node_name;
+  }
+
+  // scan existing nodes
+  auto existing_node = std::find_if(
+    node_wrappers.cbegin(),
+    node_wrappers.cend(),
+    [&requested_fqn](const auto & kv) {
+      // Copy to call non-const method from const reference
+      auto wrapper = kv.second;
+      const auto base = wrapper.get_node_base_interface();
+      return base && base->get_fully_qualified_name() == requested_fqn;
+    });
+
+  if (existing_node != node_wrappers.cend()) {
+    // already exists -> return existing instance
+    response->full_node_name = requested_fqn;
+    response->unique_id = existing_node->first;
+    response->success = true;
+    RCLCPP_WARN(
+      logger,
+      "[LoadNode] Deduplicated : node '%s' already exists. Skipping load.",
+      requested_fqn.c_str());
+    return true;
+  }
+
+  return false;
+}
+} // namespace (anonymous)
 
 ComponentManager::ComponentManager(
   std::weak_ptr<rclcpp::Executor> executor,
@@ -225,6 +281,11 @@ ComponentManager::on_load_node(
   (void) request_header;
 
   try {
+    // check if node already exists in the container
+    if (check_node_duplication(request, node_wrappers_, get_logger(), response)) {
+      return;
+    }
+
     auto resources = get_component_resources(request->package_name);
 
     for (const auto & resource : resources) {
