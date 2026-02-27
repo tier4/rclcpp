@@ -93,15 +93,19 @@ ComponentManager::ComponentManager(
 : Node(std::move(node_name), node_options),
   executor_(executor)
 {
+  auto qos_profile_keep_all = rclcpp::ServicesQoS().keep_all().get_rmw_qos_profile();
   loadNode_srv_ = create_service<LoadNode>(
     "~/_container/load_node",
-    std::bind(&ComponentManager::on_load_node, this, _1, _2, _3));
+    std::bind(&ComponentManager::on_load_node, this, _1, _2, _3),
+    qos_profile_keep_all);
   unloadNode_srv_ = create_service<UnloadNode>(
     "~/_container/unload_node",
-    std::bind(&ComponentManager::on_unload_node, this, _1, _2, _3));
+    std::bind(&ComponentManager::on_unload_node, this, _1, _2, _3),
+    qos_profile_keep_all);
   listNodes_srv_ = create_service<ListNodes>(
     "~/_container/list_nodes",
-    std::bind(&ComponentManager::on_list_nodes, this, _1, _2, _3));
+    std::bind(&ComponentManager::on_list_nodes, this, _1, _2, _3),
+    qos_profile_keep_all);
 
   {
     rcl_interfaces::msg::ParameterDescriptor desc{};
