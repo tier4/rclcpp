@@ -27,6 +27,13 @@ CallbackGroup::CallbackGroup(
   automatically_add_to_executor_with_node_(automatically_add_to_executor_with_node)
 {}
 
+CallbackGroup::~CallbackGroup()
+{
+  // NOTE: upstream rclcpp calls trigger_notify_guard_condition() here to notify the
+  // executor that this callback group is being destroyed. t4-main does not have the
+  // notify_guard_condition_ member or trigger_notify_guard_condition() method in CallbackGroup,
+  // so the destructor body is intentionally empty for now.
+}
 
 std::atomic_bool &
 CallbackGroup::can_be_taken_from()
