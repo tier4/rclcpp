@@ -7,10 +7,6 @@ on:
   
   # Manual trigger
   workflow_dispatch:
-  
-  # Test since this action is not yet merged so we cannot workflow_dispatch it and schedule will not work until it is merged.
-  # But we can test it by pushing to this branch.
-  push:
 
 jobs:
   sync:
