@@ -1,4 +1,5 @@
 // Copyright 2021 Open Source Robotics Foundation, Inc.
+// Copyright 2024 TIER IV, Inc. (Edit for glog)
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +16,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <glog/logging.h>
 
 #include "rclcpp/rclcpp.hpp"
 #include "rclcpp/utilities.hpp"
@@ -22,6 +24,9 @@
 
 int main(int argc, char * argv[])
 {
+  google::InitGoogleLogging(argv[0]);
+  google::InstallFailureSignalHandler();
+
   /// Component container with dedicated single-threaded executors for each components.
   rclcpp::init(argc, argv);
   // parse arguments
