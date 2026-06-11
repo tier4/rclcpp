@@ -3,6 +3,14 @@ Changelog for package rclcpp_action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
+28.1.20 (2026-06-09)
+--------------------
+* Initialize GenericClient result response offsets (backport `#2790 <https://github.com/ros2/rclcpp/issues/2790>`_) (`#3139 <https://github.com/ros2/rclcpp/issues/3139>`_)
+* Contributors: Lidang Jiang
+
+28.1.19 (2026-06-02)
+--------------------
+
 28.1.18 (2026-03-25)
 --------------------
 * Backport: Implement action generic client (`#2759 <https://github.com/ros2/rclcpp/issues/2759>`_) (`#3017 <https://github.com/ros2/rclcpp/issues/3017>`_)

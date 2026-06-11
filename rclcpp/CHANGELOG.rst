@@ -2,6 +2,28 @@
 Changelog for package rclcpp
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+28.1.20 (2026-06-09)
+--------------------
+* Add Callback Group Events Executor (Jazzy Backport) (`#3163 <https://github.com/ros2/rclcpp/issues/3163>`_)
+  * initial backport commit
+  * remove C++20 features (designated initializers)
+  * update executor tests
+  * add component_container_events_cbg
+  * change to use shared_ptr by value
+  * explicit type
+  * remove fix non-applicable to jazzy
+  * lint
+  ---------
+  Co-authored-by: Skyler Medeiros <skye@polymathrobotics.com>
+* Contributors: Skyler Medeiros
+
+28.1.19 (2026-06-02)
+--------------------
+* chore: fix typo in test_time_source.cpp (`#3145 <https://github.com/ros2/rclcpp/issues/3145>`_) (`#3149 <https://github.com/ros2/rclcpp/issues/3149>`_)
+  (cherry picked from commit a3cfbd7332243dca8672b765051173a251f4e2bf)
+  Co-authored-by: Pietro Gelmini <86184562+Gelminaio@users.noreply.github.com>
+* Contributors: mergify[bot]
+
 28.1.18 (2026-03-25)
 --------------------
 * Remove duplicate test cases in TestAnySubscriptionCallback::is_serialized_message_callback (backport `#3104 <https://github.com/ros2/rclcpp/issues/3104>`_) (`#3107 <https://github.com/ros2/rclcpp/issues/3107>`_)
